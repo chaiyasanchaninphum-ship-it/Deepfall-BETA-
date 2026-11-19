@@ -19,12 +19,14 @@ function spr(file, emoji, color, size, cls = '', anim = null) {
 const idleOf = d => d && d.anim && d.anim.idle;
 function ico(file, emoji) { return `<span class="ico"><img src="${assetSrc(file)}" alt="" onload="this.parentNode.classList.add('has')" onerror="this.remove()"><span>${emoji}</span></span>` }
 const IC = { gold: () => ico('icon_gold', '🪙'), cry: () => ico('icon_crystal', '💎'), soul: () => ico('icon_soul', '👻'), ration: () => ico('icon_ration', '🍞'), potion: () => ico('icon_potion', '🧪'), feather: () => ico('icon_feather', '🪶') };
-function bg(file, fallback) { return `background-image:linear-gradient(rgba(10,8,6,.35),rgba(10,8,6,.75)),url(${assetSrc(file)}),${fallback}` }
+function bg(file, fallback, dim = [.35, .75]) { return `background-image:linear-gradient(rgba(10,8,6,${dim[0]}),rgba(10,8,6,${dim[1]})),url(${assetSrc(file)}),${fallback}` }
 const BG = {
-  lobby: () => bg('bg_lobby', 'radial-gradient(ellipse at 50% 110%,#5a3416 0%,#1c130d 55%,#0b0907 100%)'),
-  dun: () => bg('bg_dungeon_1', 'linear-gradient(#16201a,#0c110d)'),
-  boss: () => bg('bg_boss_1', 'radial-gradient(ellipse at 50% 30%,#1c2a3a,#07090c)'),
-  title: () => bg('bg_title', 'radial-gradient(ellipse at 50% 80%,#3a2410 0%,#0b0907 70%)')
+  lobby: () => bg('bg_lobby', 'radial-gradient(ellipse at 50% 110%,#5a3416 0%,#1c130d 55%,#0b0907 100%)', [.15, .6]),
+  // dungeon background by floor and room kind: config.dungeon.backgrounds { floors: { "1": file, "3": file }, elite, boss }
+  dun: (f, kind) => { const bgc = C.dungeon.backgrounds || {}; let file = bgc[kind];
+    if (!file) { const fl = bgc.floors || {}; let k = f; while (k > 0 && !fl[k]) k--; file = fl[k] || 'bg_dungeon_1' }
+    return bg(file, kind === 'boss' ? 'radial-gradient(ellipse at 50% 30%,#1c2a3a,#07090c)' : 'linear-gradient(#16201a,#0c110d)', [.3, .65]) },
+  title: () => bg(ui.intro ? 'story_intro' : 'bg_title', 'radial-gradient(ellipse at 50% 80%,#3a2410 0%,#0b0907 70%)', [.1, .55])
 };
 const stars = n => '★'.repeat(n);
 const nl = s => String(s || '');
@@ -81,10 +83,10 @@ function resBar() {
 
 // ================= title =================
 function titleScreen() {
-  return `<div class="screen" style="${BG.title()};justify-content:center;align-items:center;text-align:center;padding:24px">${modBar()}
+  return `<div class="screen" style="${BG.title()};background-position:${ui.intro ? '50%' : '22%'} center;justify-content:center;align-items:center;text-align:center;padding:24px">${modBar()}
   <div class="pix mut" style="letter-spacing:3px">ห้วงลึกของผู้เลือก</div><h1>DEEPFALL</h1>
   <p class="mut" style="max-width:300px">เกมกาชาที่กลายเป็นโลกจริง<br>ทุกการเลือกมีราคา</p>
-  <button class="pri" style="font-size:17px;padding:12px 28px;margin-top:20px" onclick="G.start()">เริ่มเกม</button></div>`;
+  ${ui.intro ? '' : `<button class="pri" style="font-size:17px;padding:12px 28px;margin-top:20px" onclick="G.start()">เริ่มเกม</button>`}</div>`;
 }
 
 // ================= lobby =================
@@ -287,7 +289,7 @@ function mapScreen() {
   const nodes = m.layers.map((row, l) => row.map((n, i) => { const rm = ROOM[n.t], cur = r.pos.l === l && r.pos.i === i, av = avail.some(a => a[0] === l && a[1] === i);
     return `<button class="node ${n.done ? 'done' : ''} ${cur ? 'cur' : ''} ${av ? 'av' : ''}" style="left:${n.x}%;top:${l * 78 + 45}px" ${av ? `onclick="G.enter(${l},${i})"` : ''} title="${rm[2]}">${spr(rm[0], rm[1], 'transparent', 34)}</button>` }).join('')).join('');
   const party = r.party.map(id => { const d = HEROES[id], mx = heroStats(id).maxHp, hp = r.hp[id]; return `<div>${d.name}<div class="hpb"><i style="width:${hp / mx * 100}%"></i></div>${hp}/${mx}</div>` }).join('');
-  return `<div class="screen" style="${isBoss ? BG.boss() : BG.dun()}">${modBar()}
+  return `<div class="screen" style="${BG.dun(r.floor, isBoss ? 'boss' : '')}">${modBar()}
   <div class="bar"><b class="pix" style="color:var(--lamp2)">ชั้น ${r.floor} · ${isBoss ? STORY.bossRoomName : STORY.dungeonName}</b><span class="res">${IC.ration()} ${S.inv.rations}</span><span class="res">${IC.potion()} ${S.inv.potions}</span><span class="mut">ของที่เก็บ: ${IC.gold()}${r.loot.gold} ${IC.cry()}${r.loot.crystals} ${IC.soul()}${r.loot.souls}</span></div>
   <div style="padding:8px"><div class="mini">${party}</div>${r.hungry ? `<div style="color:var(--red);font-size:12px;margin-top:6px;text-align:center">🍞 เสบียงหมด! ทุกก้าวทำให้ทีมเสีย HP ${Math.round(C.dungeon.starvePct * 100)}%</div>` : ''}</div>
   <div class="body"><div class="map" style="height:${H}px"><svg viewBox="0 0 100 ${H}" preserveAspectRatio="none">${lines}</svg>${nodes}</div>
@@ -624,7 +626,7 @@ function battleScreen() {
     if (b.sel) { const nm = b.sel === 'potion' ? 'ยาฟื้นฟู' : HSK[b.sel].name; acts = `<div class="row" style="justify-content:space-between"><span>เลือกเป้าหมายสำหรับ <b>${nm}</b></span><button onclick="G.cancel()">ยกเลิก</button></div>` }
     else acts = `<div style="margin-bottom:6px"><b style="color:var(--lamp2)">${u.name}</b> <span class="mut">ถึงตาแล้ว</span></div><div class="grid">${[...u.skills, 'defend'].filter(k => HSK[k]).map(k => { const s = HSK[k], hid = HEROES[u.id].hidden === k; return `<button onclick="G.sk('${k}')" ${u.cd[k] ? 'disabled' : ''} style="${hid ? 'border-color:var(--pur)' : ''}">${hid ? '✦ ' : ''}${s.name}${u.cd[k] ? ` (${u.cd[k]})` : ''}<small>${s.desc}</small></button>` }).join('')}<button onclick="G.sk('potion')" ${S.inv.potions ? '' : 'disabled'}>${IC.potion()} ยา (${S.inv.potions})<small>ฟื้น HP ${Math.round(C.dungeon.potionHeal * 100)}%</small></button></div>`;
   }
-  return `<div class="bt" style="${b.kind === 'boss' ? BG.boss() : BG.dun()}">
+  return `<div class="bt" style="${BG.dun(r.floor, b.kind === 'battle' ? '' : b.kind)}">
   <div class="bar"><b class="pix" style="color:var(--lamp2)">ชั้น ${r.floor}</b><span>เทิร์น ${b.round}</span><span class="mut">${b.kind === 'boss' ? 'บอส' : b.kind === 'elite' ? 'ศัตรูเก่ง' : ''}</span></div>
   <div class="side">${b.enemies.map((e, i) => e.alive || !e.sum ? unitHtml(b, e, i) : '').join('')}</div>
   <div class="mid">${b.phase === 'player' ? 'วางแผนจากท่าที่ศัตรูประกาศไว้ด้านบน' : ''}</div>
@@ -653,7 +655,7 @@ function retreat() {
 window.G = {
   cb: i => { const f = _cb[i]; f && f() },
   close: closeModal,
-  start: () => { storyModal(STORY.intro, () => { S.started = true; C.start.heroes.filter(id => HEROES[id]).forEach(addHero); save(); render(); toast(STORY.afterIntro) }, '') },
+  start: () => { ui.intro = true; render(); storyModal(STORY.intro, () => { ui.intro = false; S.started = true; C.start.heroes.filter(id => HEROES[id]).forEach(addHero); save(); render(); toast(STORY.afterIntro) }, '') },
   tab: t => { ui.tab = t; render() },
   jtab: t => { ui.jtab = t; render() },
   ev: c => resolveEvent(c),

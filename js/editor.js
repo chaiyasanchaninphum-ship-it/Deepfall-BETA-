@@ -116,7 +116,8 @@ function imagesTab() {
   const rows = [];
   dataKeys(DATA.heroes).forEach(id => { const h = DATA.heroes[id]; rows.push([h.file, `${h.name} (ตัวเต็ม)`, '64×64']); rows.push([h.file + '_portrait', `${h.name} (พอร์เทรต)`, '96×96']); if (h.anim && h.anim.idle) rows.push([h.anim.idle.file, `${h.name} (อนิเมชันยืน ${h.anim.idle.frames} เฟรม)`, 'แถบแนวนอน']) });
   dataKeys(DATA.enemies).forEach(id => { const e = DATA.enemies[id]; rows.push([e.file, e.name, e.boss ? '128×128' : '64×64']); if (e.anim && e.anim.idle) rows.push([e.anim.idle.file, `${e.name} (อนิเมชัน)`, 'แถบแนวนอน']) });
-  [['bg_title', 'หน้าเริ่มเกม'], ['story_intro', 'ฉากเปิดเรื่อง'], ['bg_lobby', 'ล็อบบี้'], ['bg_dungeon_1', 'ดันเจี้ยน ชั้น 1–4'], ['bg_boss_1', 'ห้องบอส']].forEach(x => rows.push([x[0], x[1], '320×180']));
+  const bgc = DATA.config.dungeon.backgrounds || {}, dunBgs = [...new Set([...Object.values(bgc.floors || {}), bgc.elite, bgc.boss].filter(Boolean))];
+  [['bg_title', 'หน้าเริ่มเกม'], ['story_intro', 'ฉากเปิดเรื่อง'], ['bg_lobby', 'ล็อบบี้'], ...dunBgs.map(f => [f, 'พื้นหลังดันเจี้ยน (ตั้งค่า → dungeon → backgrounds)'])].forEach(x => rows.push([x[0], x[1], '960×540']));
   [['icon_crystal', 'คริสตัล'], ['icon_gold', 'ทอง'], ['icon_soul', 'เศษวิญญาณ'], ['icon_ration', 'เสบียง'], ['icon_potion', 'ยา'], ['icon_feather', 'ขนนกฟีนิกซ์'],
    ['room_battle', 'ห้องต่อสู้'], ['room_elite', 'ห้องศัตรูเก่ง'], ['room_treasure', 'ห้องสมบัติ'], ['room_rest', 'ห้องพัก'], ['room_event', 'ห้องเหตุการณ์'], ['room_merchant', 'ห้องพ่อค้า'], ['room_stairs', 'บันได'], ['room_boss', 'ห้องบอส']].forEach(x => rows.push([x[0], x[1], '32×32']));
   const seen = new Set();

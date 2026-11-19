@@ -42,7 +42,13 @@
     "eliteFromFloor": 2,
     "potionHeal": 0.4,
     "restHeal": 0.35,
-    "restTalkHeal": 0.1
+    "restTalkHeal": 0.1,
+    "backgrounds": {
+      "_note": "ภาพพื้นหลังดันเจี้ยน: floors = เริ่มใช้ตั้งแต่ชั้นที่ระบุ · elite = ห้องศัตรูเก่ง · boss = ห้องบอส",
+      "floors": {"1": "bg_dungeon_1", "3": "bg_dungeon_2"},
+      "elite": "bg_boss_1",
+      "boss": "bg_boss_1"
+    }
   },
   "rewards": {
     "_note": "ทองของ battle / elite / treasure / secret คูณด้วยเลขชั้น · [a, b] = สุ่มระหว่าง a ถึง b",

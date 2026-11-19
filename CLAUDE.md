@@ -22,7 +22,7 @@ Thai fantasy gacha + dungeon-crawler browser game (inspired by "Surviving the Ga
 ## Common jobs (cheap paths)
 - Owner pastes editor export (`=== data/<file>.json ===` blocks): for each block `python3 tools/fmt.py --stdin <file> < block.json`, then playtest, commit, push, republish.
 - New hero/enemy/skill/event: edit only the data file(s); engine changes only for genuinely new mechanics (new fx type, new AI special, new room type).
-- Owner sends images: PixelLab character export (zip/png+json) → `python3 tools/import_pixellab.py <zip> hero_XX` (writes still, portrait, idle strip, keeps source in assets/src/) then add the printed `"anim"` to the hero/enemy in data. Other images: resize to the listed size with nearest-neighbour, transparent background, save into `assets/` with the exact name.
+- Owner sends images: PixelLab character export (zip/png+json) → `python3 tools/import_pixellab.py <zip> hero_XX` (writes still, portrait, idle strip, keeps source in assets/src/) then add the printed `"anim"` to the hero/enemy in data. Backgrounds: 960×540, quantize to 256 colours (≈350 KB each), originals' README in assets/src/backgrounds; which dungeon floor uses which file is `config.dungeon.backgrounds`. Other images: resize to the listed size with nearest-neighbour, transparent background, save into `assets/` with the exact name.
 - Balance check: `python3 tools/playtest.py --runs 0 --boss 10 --levels 3,6,10`.
 
 ## Ship
