@@ -1,0 +1,80 @@
+{
+  "_help": {
+    "ai": "seq = ลำดับท่าที่ใช้วนไปเรื่อยๆ · special cult = ฮีลพวกที่บาดเจ็บทุก 2 เทิร์น · special boss = ใช้ p1 ก่อน แล้วเปลี่ยนเป็น p2 เมื่อ HP ต่ำกว่า phase2At",
+    "tg": "ท่าตีคนเดียวเล็งใคร: front = แถวหน้า (70%) · low = คนที่ HP เหลือน้อยสุด · rand = สุ่ม",
+    "file": "ชื่อไฟล์ภาพใน assets/ (ไม่ต้องใส่ .png)"
+  },
+  "rat": {
+    "name": "หนูซากศพ",
+    "file": "enemy_01",
+    "emoji": "🐀",
+    "color": "#4e4640",
+    "hp": 20,
+    "atk": 5,
+    "def": 0,
+    "tg": "front",
+    "ai": {"seq": ["bite", "bite", "gnaw"]}
+  },
+  "skel": {
+    "name": "โครงกระดูกทหาร",
+    "file": "enemy_02",
+    "emoji": "💀",
+    "color": "#6e6658",
+    "hp": 30,
+    "atk": 7,
+    "def": 2,
+    "tg": "front",
+    "ai": {"seq": ["rslash", "rslash", "brace"]}
+  },
+  "slime": {
+    "name": "เมือกพิษ",
+    "file": "enemy_03",
+    "emoji": "🟢",
+    "color": "#3c6430",
+    "hp": 26,
+    "atk": 5,
+    "def": 0,
+    "tg": "rand",
+    "ai": {"seq": ["spit", "slam"]}
+  },
+  "cult": {
+    "name": "นักบวชคลั่ง",
+    "file": "enemy_04",
+    "emoji": "🧙",
+    "color": "#40324e",
+    "hp": 24,
+    "atk": 6,
+    "def": 1,
+    "tg": "low",
+    "ai": {"special": "cult", "seq": ["curse", "darkbolt"], "heal": "mend", "healBelow": 0.55}
+  },
+  "ghoul": {
+    "name": "กูลหิวโหย",
+    "file": "enemy_05",
+    "emoji": "👹",
+    "color": "#34404e",
+    "hp": 80,
+    "atk": 9,
+    "def": 2,
+    "tg": "low",
+    "ai": {"seq": ["frenzy", "roar", "devour"]}
+  },
+  "boss": {
+    "name": "ผู้คุมสุสาน มอร์ดัน",
+    "file": "boss_01",
+    "emoji": "⚱️",
+    "color": "#26303c",
+    "hp": 380,
+    "atk": 14,
+    "def": 3,
+    "tg": "rand",
+    "boss": true,
+    "ai": {
+      "special": "boss",
+      "phase2At": 0.5,
+      "p1": ["toll", "sweep", "summon"],
+      "p2": ["secondtoll", "verdict", "sweep", "reap"],
+      "phase2Log": "⚠️ ผู้คุมสุสานคำรามลั่น! ระฆังที่เอวสั่นไหว..."
+    }
+  }
+}

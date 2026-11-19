@@ -1,0 +1,12 @@
+{
+  "_help": "normal / elite: แยกตามชั้น แต่ละชั้นมีหลายกลุ่ม สุ่มมา 1 กลุ่ม ชั้นที่ไม่มีรายการจะใช้ของชั้นที่ต่ำกว่า · boss: กลุ่มในห้องบอส · bossEnemyFloor: ความแข็งของลูกน้องบอส (เทียบเท่าชั้นที่)",
+  "normal": {
+    "1": [["rat", "rat"], ["rat", "skel"], ["slime", "rat"], ["skel"]],
+    "2": [["skel", "rat", "rat"], ["slime", "slime"], ["cult", "skel"], ["rat", "slime", "rat"]],
+    "3": [["skel", "skel", "cult"], ["slime", "cult", "rat"], ["skel", "slime", "skel"]],
+    "4": [["skel", "cult", "skel"], ["slime", "slime", "cult"], ["skel", "skel", "rat", "cult"]]
+  },
+  "elite": {"2": [["ghoul"]], "3": [["ghoul", "rat"]], "4": [["ghoul", "cult"]]},
+  "boss": ["boss", "skel"],
+  "bossEnemyFloor": 4
+}

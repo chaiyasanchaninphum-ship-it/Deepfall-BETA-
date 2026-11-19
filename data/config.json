@@ -1,0 +1,66 @@
+{
+  "start": {
+    "gold": 300,
+    "crystals": 1500,
+    "souls": 0,
+    "rations": 10,
+    "potions": 2,
+    "heroes": ["bran", "pip"]
+  },
+  "gacha": {
+    "cost1": 100,
+    "cost10": 1000,
+    "rates": {"5": 3, "4": 9, "3": 24, "2": 30, "1": 34},
+    "pity": 40,
+    "pityStar": 4,
+    "firstTenMinStar": 3,
+    "maxRank": 5,
+    "rankBonus": 0.1,
+    "dupeMaxSouls": 2
+  },
+  "hero": {
+    "lvBonus": 0.1,
+    "defLvBonus": 0.05,
+    "maxLv": 20,
+    "trainCostPerLv": 40,
+    "affBonusAt": 6,
+    "affBonus": 0.05
+  },
+  "death": {"surviveChance": 0.3, "reviveSouls": {"1": 1, "2": 2, "3": 3, "4": 5, "5": 8}, "reviveLvLoss": 1},
+  "dungeon": {
+    "bossFloor": 5,
+    "layers": 5,
+    "bossLayers": 3,
+    "enemyScalePerFloor": 0.18,
+    "enemyDefScalePerFloor": 0.1,
+    "starvePct": 0.08,
+    "retreatKeep": 0.5,
+    "journalCrystals": 50,
+    "knowWeakKills": 5,
+    "knowWeakBonus": 0.2,
+    "roomWeights": {"battle": 42, "event": 20, "treasure": 12, "rest": 10, "elite": 10, "merchant": 6},
+    "eliteFromFloor": 2,
+    "potionHeal": 0.4,
+    "restHeal": 0.35,
+    "restTalkHeal": 0.1
+  },
+  "rewards": {
+    "_note": "ทองของ battle / elite / treasure / secret คูณด้วยเลขชั้น · [a, b] = สุ่มระหว่าง a ถึง b",
+    "battle": {"gold": [10, 18], "crystals": [4, 9], "soulChance": 0.06},
+    "elite": {"gold": [25, 40], "crystals": [25, 40], "soulChance": 0.4},
+    "boss": {"gold": 250, "crystals": 400, "souls": 3},
+    "treasure": {"gold": [20, 40], "crystals": [15, 35], "soulChance": 0.15, "potionChance": 0.35, "rationChance": 0.3},
+    "secret": {"gold": [60, 90], "crystals": [120, 180], "souls": 2}
+  },
+  "shop": {"ration5": 25, "potion": 30, "soul": 150},
+  "merchant": {"potion": 35, "ration3": 15},
+  "lobby": {
+    "noEventChance": 0.3,
+    "neglectRuns": 3,
+    "neglectCost": 20,
+    "featherPrice": 150,
+    "crystalPackPrice": 80,
+    "crystalPack": 100,
+    "giftRations": 4
+  }
+}

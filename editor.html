@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deepfall Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&family=Pixelify+Sans:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+#app{max-width:760px}
+.top{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:2px solid var(--line)}
+.top .row{padding:8px 12px;justify-content:space-between}
+.etabs{display:flex;overflow-x:auto;gap:4px;padding:0 8px 8px}
+.etabs button{white-space:nowrap;font-size:13px;padding:6px 10px}
+.etabs button.on{border-color:var(--lamp);color:var(--lamp2)}
+.etabs button.chg::after{content:' •';color:var(--pur)}
+.wrap{padding:12px}
+details.item{background:var(--panel);border:2px solid var(--line);border-radius:8px;margin-bottom:8px}
+details.item>summary{padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;list-style:none}
+details.item>summary::-webkit-details-marker{display:none}
+details.item[open]>summary{border-bottom:1px solid var(--line)}
+.ibody{padding:10px 12px}
+.f{display:grid;grid-template-columns:120px 1fr;gap:8px;align-items:start;margin-bottom:6px}
+.f>label{font-size:12px;color:var(--mut);padding-top:7px;word-break:break-word}
+input,textarea,select{width:100%;font-family:inherit;font-size:14px;color:var(--tx);background:#15110e;border:1px solid var(--line);border-radius:5px;padding:6px 8px}
+textarea{min-height:60px;resize:vertical;line-height:1.5}
+input[type=checkbox]{width:auto}
+.grp{border-left:2px solid var(--line);padding-left:10px;margin:4px 0 8px}
+.grp .gh{font-size:12px;color:var(--lamp2);margin:4px 0;display:flex;justify-content:space-between;align-items:center}
+.arr-item{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:6px;padding:6px 8px;margin-bottom:6px}
+.sm{font-size:12px;padding:3px 8px}
+.help{background:#1b2230;border:1px solid #34445e;border-radius:6px;padding:8px 10px;font-size:12px;color:#b9c8e0;margin-bottom:10px;white-space:pre-line}
+.status{font-size:12px;color:var(--mut)}
+.warn{background:#3a1a14;border:1px solid var(--red);border-radius:6px;padding:8px 10px;font-size:12px;margin-bottom:10px}
+.imgrow{display:grid;grid-template-columns:72px 1fr auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px;margin-bottom:6px}
+.imgbox{width:72px;height:72px;background:repeating-conic-gradient(#2a2420 0 25%,#1e1915 0 50%) 0 0/12px 12px;border-radius:6px;display:grid;place-items:center;overflow:hidden}
+.imgbox img{max-width:100%;max-height:100%;image-rendering:pixelated}
+.ok{color:var(--grn)}.miss{color:var(--mut)}.draft{color:var(--pur)}
+.dlg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:16px;z-index:30}
+</style>
+</head>
+<body>
+<div id="app"><div class="loading">กำลังโหลด Editor...</div></div>
+<div id="dlg"></div>
+<script src="js/data.js"></script>
+<script src="js/editor.js"></script>
+</body>
+</html>

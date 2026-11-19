@@ -1,0 +1,100 @@
+{
+  "_help": {
+    "tgt": "เป้าหมาย: enemy = เลือกศัตรู 1 ตัว · ally = เลือกเพื่อน 1 คน · self = ใช้กับตัวเอง · all = ศัตรูทุกตัว",
+    "cd": "คูลดาวน์ = ต้องรอกี่เทิร์นก่อนใช้ซ้ำ",
+    "fx": "ผลของสกิล ทำตามลำดับ · t: dmg (m = ตัวคูณดาเมจ) · heal (m = ×ATK หรือ p = ×HP สูงสุดของเป้า) · shield (p = ×HP สูงสุด) · st (s = weak อ่อนแรง / vuln เปราะบาง / taunt ยั่วยุ / poison พิษ / burn ไหม้, turns = จำนวนเทิร์น, v = ×ATK สำหรับพิษ/ไหม้) · stun มึนงง · cleanse ล้างพิษ · lifesteal (p = ดูดเลือดจากดาเมจ) · steal (ขโมยทอง/คริสตัล)",
+    "to": "ใส่เพิ่มในผลแต่ละอัน: target เป้าที่เลือก · self ตัวเอง · team ทั้งทีม · others ทั้งทีมยกเว้นตัวเอง · enemies ศัตรูทุกตัว",
+    "enemy.kind": "ชนิดท่าศัตรู: single ตีคนเดียว · rand2 สุ่มตี 2 ครั้ง · allh ตีทั้งทีม · self ใช้กับตัวเอง · ally ฮีลพวกเดียวกัน · summon เรียกลูกน้อง · charge เตือนก่อนท่าใหญ่",
+    "enemy.mult": "ตัวคูณดาเมจ (0 = ไม่ตี)"
+  },
+  "hero": {
+    "bash": {"name": "ฟาดโล่", "cd": 0, "tgt": "enemy", "desc": "โจมตี 100%", "fx": [{"t": "dmg", "m": 1}]},
+    "raise": {"name": "ยกโล่", "cd": 2, "tgt": "self", "desc": "ยั่วยุ 2 เทิร์น + โล่ 35% HP", "fx": [{"t": "st", "s": "taunt", "turns": 2}, {"t": "shield", "p": 0.35}]},
+    "lastwall": {
+      "name": "กำแพงสุดท้าย",
+      "cd": 4,
+      "tgt": "self",
+      "desc": "ยั่วยุ 2 เทิร์น โล่ตัวเอง 60% และโล่ทั้งทีม 25% HP",
+      "fx": [{"t": "st", "s": "taunt", "turns": 2}, {"t": "shield", "p": 0.6}, {"t": "shield", "p": 0.25, "to": "others"}]
+    },
+    "stab": {"name": "ปาดมีด", "cd": 0, "tgt": "enemy", "desc": "โจมตี 100%", "fx": [{"t": "dmg", "m": 1}]},
+    "poisonknife": {
+      "name": "มีดอาบพิษ",
+      "cd": 2,
+      "tgt": "enemy",
+      "desc": "โจมตี 60% + พิษ 3 เทิร์น",
+      "fx": [{"t": "dmg", "m": 0.6}, {"t": "st", "s": "poison", "turns": 3, "v": 0.55}]
+    },
+    "quickhands": {
+      "name": "มือไว",
+      "cd": 3,
+      "tgt": "enemy",
+      "desc": "โจมตี 130% และขโมยทอง+คริสตัล",
+      "fx": [{"t": "dmg", "m": 1.3}, {"t": "steal", "gold": [10, 25], "crystals": [5, 12]}]
+    },
+    "shoot": {"name": "ยิงธนู", "cd": 0, "tgt": "enemy", "desc": "โจมตี 100%", "fx": [{"t": "dmg", "m": 1}]},
+    "arrowrain": {"name": "ฝนธนู", "cd": 3, "tgt": "all", "desc": "โจมตีศัตรูทุกตัว 65%", "fx": [{"t": "dmg", "m": 0.65}]},
+    "staff": {"name": "ไม้เท้าทุบ", "cd": 0, "tgt": "enemy", "desc": "โจมตี 80%", "fx": [{"t": "dmg", "m": 0.8}]},
+    "heal": {"name": "แสงตะเกียง", "cd": 1, "tgt": "ally", "desc": "ฟื้น HP 250% ATK + ล้างพิษ/ไหม้", "fx": [{"t": "heal", "m": 2.5}, {"t": "cleanse"}]},
+    "slash": {"name": "ฟัน", "cd": 0, "tgt": "enemy", "desc": "โจมตี 100%", "fx": [{"t": "dmg", "m": 1}]},
+    "pierce": {
+      "name": "ฟันทะลวง",
+      "cd": 2,
+      "tgt": "enemy",
+      "desc": "โจมตี 180% + เปราะบาง 2 เทิร์น",
+      "fx": [{"t": "dmg", "m": 1.8}, {"t": "st", "s": "vuln", "turns": 2}]
+    },
+    "fireball": {"name": "ลูกไฟ", "cd": 0, "tgt": "enemy", "desc": "โจมตี 100%", "fx": [{"t": "dmg", "m": 1}]},
+    "inferno": {
+      "name": "ระเบิดเพลิง",
+      "cd": 3,
+      "tgt": "all",
+      "desc": "โจมตีทุกตัว 85% + ไหม้ 2 เทิร์น",
+      "fx": [{"t": "dmg", "m": 0.85}, {"t": "st", "s": "burn", "turns": 2, "v": 0.4}]
+    },
+    "holyblade": {"name": "ดาบศักดิ์สิทธิ์", "cd": 0, "tgt": "enemy", "desc": "โจมตี 100% ฟื้น HP 40% ของดาเมจ", "fx": [{"t": "dmg", "m": 1}, {"t": "lifesteal", "p": 0.4}]},
+    "bulwark": {
+      "name": "ปราการแสง",
+      "cd": 3,
+      "tgt": "self",
+      "desc": "โล่ทั้งทีม 30% HP + ยั่วยุ 1 เทิร์น",
+      "fx": [{"t": "st", "s": "taunt", "turns": 1}, {"t": "shield", "p": 0.3, "to": "team"}]
+    },
+    "thorn": {"name": "หนามเงา", "cd": 0, "tgt": "enemy", "desc": "โจมตี 110% + อ่อนแรง 1 เทิร์น", "fx": [{"t": "dmg", "m": 1.1}, {"t": "st", "s": "weak", "turns": 1}]},
+    "abysscurse": {
+      "name": "คำสาปห้วงลึก",
+      "cd": 3,
+      "tgt": "all",
+      "desc": "โจมตีทุกตัว 120% + อ่อนแรง 2 เทิร์น",
+      "fx": [{"t": "dmg", "m": 1.2}, {"t": "st", "s": "weak", "turns": 2}]
+    },
+    "defend": {"name": "ตั้งรับ", "cd": 0, "tgt": "self", "desc": "โล่ 25% HP ของตัวเอง", "fx": [{"t": "shield", "p": 0.25}]}
+  },
+  "enemy": {
+    "bite": {"name": "กัด", "icon": "⚔️", "kind": "single", "mult": 1},
+    "gnaw": {"name": "แทะกระดูก", "icon": "🦴", "kind": "single", "mult": 0.6, "note": "+เปราะบาง", "fx": [{"t": "st", "s": "vuln", "turns": 2}]},
+    "rslash": {"name": "ฟันดาบสนิม", "icon": "⚔️", "kind": "single", "mult": 1},
+    "brace": {"name": "ตั้งโล่", "icon": "🛡️", "kind": "self", "note": "โล่ตัวเอง", "fx": [{"t": "shield", "p": 0.3, "to": "self"}]},
+    "spit": {"name": "พ่นพิษ", "icon": "☠️", "kind": "single", "mult": 0.5, "note": "+พิษ 3 เทิร์น", "fx": [{"t": "st", "s": "poison", "turns": 3, "v": 0.5}]},
+    "slam": {"name": "กระแทก", "icon": "⚔️", "kind": "single", "mult": 1.1},
+    "curse": {"name": "สาปแช่ง", "icon": "🌀", "kind": "allh", "mult": 0, "note": "อ่อนแรงทั้งทีม", "fx": [{"t": "st", "s": "weak", "turns": 2}]},
+    "darkbolt": {"name": "ลูกศรมืด", "icon": "🔮", "kind": "single", "mult": 1.4},
+    "mend": {"name": "บทสวดเลือด", "icon": "💚", "kind": "ally", "note": "ฟื้นพวกเดียวกัน", "fx": [{"t": "heal", "m": 2.2}]},
+    "frenzy": {"name": "ข่วนบ้าคลั่ง", "icon": "⚔️", "kind": "rand2", "mult": 0.7, "note": "สุ่มโจมตี 2 ครั้ง"},
+    "roar": {"name": "คำราม", "icon": "📢", "kind": "allh", "mult": 0, "note": "เปราะบางทั้งทีม", "fx": [{"t": "st", "s": "vuln", "turns": 2}]},
+    "devour": {"name": "ขย้ำ", "icon": "💀", "kind": "single", "mult": 1.9},
+    "toll": {"name": "ระฆังไว้อาลัย", "icon": "🔔", "kind": "single", "mult": 0.5, "note": "+มึนงง", "fx": [{"t": "stun"}]},
+    "sweep": {"name": "กวาดเคียว", "icon": "🌙", "kind": "allh", "mult": 0.8},
+    "reap": {"name": "เคียวเกี่ยววิญญาณ", "icon": "💀", "kind": "single", "mult": 1.5},
+    "summon": {"name": "ปลุกศพ", "icon": "⚰️", "kind": "summon", "unit": "skel", "count": 2, "maxEnemies": 4, "fallback": "reap", "note": "เรียกโครงกระดูก"},
+    "secondtoll": {
+      "name": "ระฆังครั้งที่สอง",
+      "icon": "🔔🔔",
+      "kind": "charge",
+      "reveal": true,
+      "warn": "เทิร์นหน้า: ดาเมจหนักทั้งทีม! เตรียมโล่",
+      "log": "🔔 ระฆังครั้งที่สองดังก้อง... บางอย่างกำลังจะมา!"
+    },
+    "verdict": {"name": "คำพิพากษาแห่งหลุมศพ", "icon": "☠️", "kind": "allh", "mult": 2.1, "reveal": true, "secret": true}
+  }
+}
