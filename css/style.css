@@ -98,3 +98,7 @@ h1{font-family:"Pixelify Sans",Kanit;color:var(--lamp2);margin:0;font-size:34px;
 .modbar a{color:var(--lamp2)}
 .loading{display:grid;place-items:center;min-height:100vh;color:var(--mut);text-align:center;padding:24px}
 a{color:var(--lamp2)}
+.spr .ani,.spr img.probe{display:none}
+.spr.has .ani{display:block;position:absolute;inset:0;background-repeat:no-repeat;background-size:var(--w) 100%;image-rendering:pixelated;animation:spr var(--d) steps(var(--n)) infinite}
+.spr.has .ani~img.still{display:none}
+@keyframes spr{from{background-position-x:0}to{background-position-x:calc(var(--w) * -1)}}

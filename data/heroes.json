@@ -7,6 +7,7 @@
     "file": "hero_01",
     "emoji": "🛡️",
     "color": "#56636f",
+    "anim": {"idle": {"file": "hero_01_idle", "frames": 4, "fps": 6}},
     "hp": 72,
     "atk": 6,
     "def": 4,

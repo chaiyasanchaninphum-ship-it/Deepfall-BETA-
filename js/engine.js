@@ -8,9 +8,15 @@ const RR = v => Array.isArray(v) ? R(v[0], v[1]) : (v || 0);
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const fmt = (s, o) => String(s || '').replace(/\{(\w+)\}/g, (m, k) => o[k] != null ? o[k] : m);
-function spr(file, emoji, color, size, cls = '') {
+// anim = { file, frames, fps } : horizontal strip of square frames (see tools/import_pixellab.py)
+function spr(file, emoji, color, size, cls = '', anim = null) {
+  if (anim && anim.file && anim.frames > 1) {
+    const src = assetSrc(anim.file), dur = (anim.frames / (anim.fps || 6)).toFixed(2);
+    return `<div class="spr ${cls}" style="--c:${color};width:${size}px;height:${size}px"><img class="probe" src="${src}" alt="" onload="this.parentNode.classList.add('has')" onerror="this.parentNode.querySelector('.ani').remove();this.remove()"><i class="ani" style="background-image:url(${src});--w:${size * anim.frames}px;--n:${anim.frames};--d:${dur}s"></i><img class="still" src="${assetSrc(file)}" alt="" onload="this.parentNode.classList.add('has')" onerror="this.remove()"><span style="font-size:${Math.round(size * .5)}px">${emoji}</span></div>`;
+  }
   return `<div class="spr ${cls}" style="--c:${color};width:${size}px;height:${size}px"><img src="${assetSrc(file)}" alt="" onload="this.parentNode.classList.add('has')" onerror="this.remove()"><span style="font-size:${Math.round(size * .5)}px">${emoji}</span></div>`;
 }
+const idleOf = d => d && d.anim && d.anim.idle;
 function ico(file, emoji) { return `<span class="ico"><img src="${assetSrc(file)}" alt="" onload="this.parentNode.classList.add('has')" onerror="this.remove()"><span>${emoji}</span></span>` }
 const IC = { gold: () => ico('icon_gold', '🪙'), cry: () => ico('icon_crystal', '💎'), soul: () => ico('icon_soul', '👻'), ration: () => ico('icon_ration', '🍞'), potion: () => ico('icon_potion', '🧪'), feather: () => ico('icon_feather', '🪶') };
 function bg(file, fallback) { return `background-image:linear-gradient(rgba(10,8,6,.35),rgba(10,8,6,.75)),url(${assetSrc(file)}),${fallback}` }
@@ -173,7 +179,7 @@ function heroesView() {
 }
 function heroCard(id, onclick, extra = '') {
   const d = HEROES[id], h = S.heroes[id];
-  return `<div class="hcard ${h.dead ? 'dead' : ''} ${extra}" onclick="${onclick}">${spr(d.file, d.emoji, d.color, 60)}<div class="nm">${h.dead ? '🪦 ' : ''}${d.name}</div><div class="stars">${stars(d.star)}${h.rank ? ` +${h.rank}` : ''}</div><div class="mut" style="font-size:11px">Lv.${h.lv} · ${d.role}</div></div>`;
+  return `<div class="hcard ${h.dead ? 'dead' : ''} ${extra}" onclick="${onclick}">${spr(d.file, d.emoji, d.color, 60, '', h.dead ? null : idleOf(d))}<div class="nm">${h.dead ? '🪦 ' : ''}${d.name}</div><div class="stars">${stars(d.star)}${h.rank ? ` +${h.rank}` : ''}</div><div class="mut" style="font-size:11px">Lv.${h.lv} · ${d.role}</div></div>`;
 }
 function skLine(k, hidden) { const s = HSK[k]; if (!s) return ''; return `<div class="sk ${hidden ? 'hid' : ''}"><b>${hidden ? '✦ ' : ''}${s.name}</b> ${s.cd ? `<span class="mut">(${hidden ? 'สกิลซ่อน · ' : ''}คูลดาวน์ ${s.cd})</span>` : ''}<br><span class="mut">${s.desc}</span></div>` }
 function heroDetail(id) {
@@ -233,7 +239,7 @@ function journalView() {
 // ----- prep -----
 function prepView() {
   const sel = ui.prep, av = owned().filter(alive).sort((a, b) => HEROES[b].star - HEROES[a].star);
-  const slots = [0, 1, 2, 3].map(i => { const id = sel[i]; const lab = i < 2 ? 'แถวหน้า' : 'แถวหลัง'; if (!id) return `<div class="hcard" style="opacity:.5"><div style="height:60px;display:grid;place-items:center;font-size:24px">＋</div><div class="mut" style="font-size:11px">${i + 1} · ${lab}</div></div>`; const d = HEROES[id]; return `<div class="hcard sel" onclick="G.psel('${id}')">${spr(d.file, d.emoji, d.color, 48)}<div class="nm" style="font-size:12px">${d.name}</div><div class="mut" style="font-size:11px">${i + 1} · ${lab}</div></div>` }).join('');
+  const slots = [0, 1, 2, 3].map(i => { const id = sel[i]; const lab = i < 2 ? 'แถวหน้า' : 'แถวหลัง'; if (!id) return `<div class="hcard" style="opacity:.5"><div style="height:60px;display:grid;place-items:center;font-size:24px">＋</div><div class="mut" style="font-size:11px">${i + 1} · ${lab}</div></div>`; const d = HEROES[id]; return `<div class="hcard sel" onclick="G.psel('${id}')">${spr(d.file, d.emoji, d.color, 48, '', idleOf(d))}<div class="nm" style="font-size:12px">${d.name}</div><div class="mut" style="font-size:11px">${i + 1} · ${lab}</div></div>` }).join('');
   return `<div class="row" style="justify-content:space-between;margin-bottom:8px"><b style="font-size:17px">เตรียมทีม</b><button onclick="G.prepX()">✕ ยกเลิก</button></div>
   <div class="grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:10px">${slots}</div>
   <p class="mut" style="margin:4px 0 8px">แตะเพื่อเลือก/เอาออก ลำดับที่เลือกคือตำแหน่ง</p>
@@ -385,8 +391,8 @@ function killHero(id) { S.heroes[id].dead = true; S.run.party = S.run.party.filt
 
 // ================= battle =================
 let UID = 0;
-function mkHeroU(id) { const st = heroStats(id), d = HEROES[id]; return { uid: ++UID, side: 'h', id, name: d.name, file: d.file, emoji: d.emoji, color: d.color, maxHp: st.maxHp, hp: S.run.hp[id], atk: st.atk, def: st.def, st: {}, cd: {}, sh: 0, alive: true, skills: [...d.skills, ...(d.hidden && S.heroes[id].hid ? [d.hidden] : [])].filter(k => HSK[k]) } }
-function mkEnemy(type, f) { const d = ENEMIES[type], dc = C.dungeon, sc = d.boss ? 1 : 1 + dc.enemyScalePerFloor * (f - 1); return { uid: ++UID, side: 'e', type, name: d.name, file: d.file, emoji: d.emoji, color: d.color, maxHp: Math.round(d.hp * sc), hp: Math.round(d.hp * sc), atk: Math.round(d.atk * sc), def: Math.round(d.def * (1 + dc.enemyDefScalePerFloor * (f - 1))), st: {}, sh: 0, alive: true, turn: 0, intent: null, boss: !!d.boss } }
+function mkHeroU(id) { const st = heroStats(id), d = HEROES[id]; return { uid: ++UID, side: 'h', id, anim: idleOf(d), name: d.name, file: d.file, emoji: d.emoji, color: d.color, maxHp: st.maxHp, hp: S.run.hp[id], atk: st.atk, def: st.def, st: {}, cd: {}, sh: 0, alive: true, skills: [...d.skills, ...(d.hidden && S.heroes[id].hid ? [d.hidden] : [])].filter(k => HSK[k]) } }
+function mkEnemy(type, f) { const d = ENEMIES[type], dc = C.dungeon, sc = d.boss ? 1 : 1 + dc.enemyScalePerFloor * (f - 1); return { uid: ++UID, side: 'e', type, anim: idleOf(d), name: d.name, file: d.file, emoji: d.emoji, color: d.color, maxHp: Math.round(d.hp * sc), hp: Math.round(d.hp * sc), atk: Math.round(d.atk * sc), def: Math.round(d.def * (1 + dc.enemyDefScalePerFloor * (f - 1))), st: {}, sh: 0, alive: true, turn: 0, intent: null, boss: !!d.boss } }
 function encFor(table, f) { let k = f; while (k > 0 && !table[k]) k--; if (!table[k]) { const ks = dataKeys(table).map(Number).sort((a, b) => a - b); k = ks[0] } return table[k] }
 function startBattle(kind) {
   const f = S.run.floor; let grp, ef = f;
@@ -602,10 +608,10 @@ function unitHtml(b, u, i) {
   let isTg = false;
   if (b.sel && u.alive) { const need = b.sel === 'potion' ? 'ally' : HSK[b.sel].tgt; isTg = (need === 'ally' && u.side === 'h') || (need === 'enemy' && u.side === 'e') }
   const act = u.side === 'h' && b.phase === 'player' && b.heroes[b.act] === u;
-  const size = u.boss ? 92 : 60;
+  const size = u.boss ? 96 : 72;
   return `<div class="unit ${u.alive ? '' : 'down'} ${act ? 'act' : ''} ${isTg ? 'tg' : ''}" data-uid="${u.uid}" ${isTg ? `onclick="G.tgt('${u.side}',${i})"` : ''}>
    ${u.side === 'e' ? intentHtml(b, u) : `<div class="pos">${i < 2 ? 'หน้า' : 'หลัง'}</div>`}
-   <div style="display:flex;justify-content:center">${spr(u.file, u.emoji, u.color, size)}</div>
+   <div style="display:flex;justify-content:center">${spr(u.file, u.emoji, u.color, size, '', u.alive ? u.anim : null)}</div>
    <div class="nm">${u.name}</div><div class="hpb ${u.side === 'e' ? 'e' : ''}"><i style="width:${u.hp / u.maxHp * 100}%"></i>${u.sh ? `<s style="width:${Math.min(100, u.sh / u.maxHp * 100)}%"></s>` : ''}</div>
    <div class="hpt">${u.hp}/${u.maxHp}</div><div class="sts">${stHtml(u)}</div></div>`;
 }
