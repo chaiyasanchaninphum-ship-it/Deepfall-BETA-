@@ -102,3 +102,30 @@ a{color:var(--lamp2)}
 .spr.has .ani{display:block;position:absolute;inset:0;background-repeat:no-repeat;background-size:var(--w) 100%;image-rendering:pixelated;animation:spr var(--d) steps(var(--n)) infinite}
 .spr.has .ani~img.still{display:none}
 @keyframes spr{from{background-position-x:0}to{background-position-x:calc(var(--w) * -1)}}
+.unit{transition:border-color .15s}
+.unit.acting{border-color:var(--red);box-shadow:0 0 12px rgba(212,73,61,.65)}
+.unit.hit{animation:hitshake .34s}
+.unit.hit .spr{animation:hitflash .3s}
+@keyframes hitshake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+@keyframes hitflash{0%{filter:brightness(3) saturate(0)}40%{filter:brightness(1.6) sepia(1) hue-rotate(-40deg) saturate(6)}100%{filter:none}}
+.slash{position:absolute;left:10%;top:22%;width:80%;height:46%;pointer-events:none;z-index:4;background:linear-gradient(135deg,transparent 44%,rgba(255,255,255,.95) 49%,rgba(255,210,122,.9) 51%,transparent 56%);animation:slash .32s ease-out forwards}
+@keyframes slash{0%{opacity:0;transform:scale(.4) translate(-20%,-20%)}30%{opacity:1}100%{opacity:0;transform:scale(1.15) translate(10%,10%)}}
+.unit.h.lunge{animation:lungeU .32s ease-out}.unit.e.lunge{animation:lungeD .32s ease-out}
+@keyframes lungeU{40%{transform:translateY(-22px) scale(1.06)}}
+@keyframes lungeD{40%{transform:translateY(22px) scale(1.06)}}
+.unit.cast{animation:cast .45s}
+@keyframes cast{50%{box-shadow:0 0 0 3px rgba(255,210,122,.6),0 0 18px rgba(255,210,122,.5)}}
+.unit.glow-g{animation:glowg .55s}.unit.glow-b{animation:glowb .5s}
+@keyframes glowg{50%{box-shadow:0 0 0 3px rgba(111,191,90,.7),0 0 20px rgba(111,191,90,.6)}}
+@keyframes glowb{50%{box-shadow:0 0 0 3px rgba(120,180,240,.7),0 0 20px rgba(120,180,240,.6)}}
+.unit.dying{animation:die .6s forwards}
+@keyframes die{0%{opacity:1;filter:brightness(3)}30%{opacity:1;filter:brightness(2) grayscale(0)}100%{opacity:.3;filter:grayscale(1)}}
+.bt.shake{animation:scr .3s}
+@keyframes scr{25%{transform:translate(-4px,2px)}50%{transform:translate(4px,-2px)}75%{transform:translate(-2px,1px)}}
+.float.big{font-size:26px;color:#ff5a48}
+.float.st{font-size:12px;color:#dcbfff;top:12%}
+.float.weak{color:var(--lamp2);font-size:13px}
+.float.kill{color:#fff;font-size:15px;top:40%}
+.banner{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%);z-index:40;pointer-events:none;font-family:"Pixelify Sans",Kanit,sans-serif;font-size:26px;color:var(--lamp2);background:rgba(18,15,13,.82);border:2px solid var(--lamp);border-radius:8px;padding:6px 22px;text-shadow:0 2px 0 #000;animation:ban 1s forwards}
+.banner.enemy{color:#ffb3a8;border-color:var(--red)}
+@keyframes ban{0%{opacity:0;transform:translate(-50%,-50%) scale(.7)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}25%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0}}

@@ -409,26 +409,31 @@ function startBattle(kind) {
 const aliveE = b => b.enemies.filter(e => e.alive);
 const aliveH = b => b.heroes.filter(h => h.alive);
 function log(b, t) { if (!t) return; b.log.push(t); if (b.log.length > 30) b.log.shift() }
-function addSt(t, k, turns, val) { const o = t.st[k]; if (o && typeof o === 'object') { o.t = Math.max(o.t, turns); if (val) o.v = Math.max(o.v, val) } else t.st[k] = { t: turns, v: val || 0 } }
-function shield(b, t, amt) { amt = Math.round(amt); t.sh = (t.sh || 0) + amt; b.fxq.push([t.uid, '🛡+' + amt, 'sh']) }
-function healU(b, t, amt) { if (!t.alive) return; amt = Math.round(amt); const real = Math.min(amt, t.maxHp - t.hp); t.hp += real; b.fxq.push([t.uid, '+' + real, 'heal']) }
+const ST_NAME = { weak: 'อ่อนแรง', vuln: 'เปราะบาง', taunt: 'ยั่วยุ', poison: 'พิษ', burn: 'ไหม้' };
+function addSt(t, k, turns, val) { if (B && ST_NAME[k]) B.fxq.push([t.uid, ST_NAME[k], 'st']); const o = t.st[k]; if (o && typeof o === 'object') { o.t = Math.max(o.t, turns); if (val) o.v = Math.max(o.v, val) } else t.st[k] = { t: turns, v: val || 0 } }
+function shield(b, t, amt) { amt = Math.round(amt); t.sh = (t.sh || 0) + amt; b.fxq.push([t.uid, '🛡+' + amt, 'sh']); sfx('shield') }
+function healU(b, t, amt) { if (!t.alive) return; amt = Math.round(amt); const real = Math.min(amt, t.maxHp - t.hp); t.hp += real; b.fxq.push([t.uid, '+' + real, 'heal']); sfx('heal') }
 function hit(b, u, t, mult) {
   if (!t || !t.alive) return 0;
   let d = u.atk * mult * (0.9 + Math.random() * .2);
   if (u.st.weak) d *= .75; if (t.st.vuln) d *= 1.3;
-  if (u.side === 'h' && t.side === 'e' && knowLv(t.type) >= 2) d *= 1 + C.dungeon.knowWeakBonus;
+  if (u.side === 'h' && t.side === 'e' && knowLv(t.type) >= 2) { d *= 1 + C.dungeon.knowWeakBonus; b.fxq.push([t.uid, 'จุดอ่อน!', 'st weak']) }
   d = Math.max(1, Math.round(d - t.def));
   return dealDmg(b, t, d);
 }
 function dealDmg(b, t, d) {
   const ab = Math.min(t.sh || 0, d); t.sh = (t.sh || 0) - ab; const real = d - ab;
   t.hp = Math.max(0, t.hp - real);
-  b.fxq.push([t.uid, real ? '-' + real : '🛡' + ab, real ? 'dmg' : 'sh']);
+  const big = real >= t.maxHp * .2;
+  b.fxq.push([t.uid, real ? '-' + real : '🛡' + ab, real ? (big ? 'dmg big' : 'dmg') : 'sh']);
+  if (real && big) b.fxq.push([0, '', 'shake']);
+  sfx(real ? (big ? 'big' : 'hit') : 'shield');
+  if (real && t.side === 'h') buzz(big ? 60 : 25);
   if (t.hp <= 0 && t.alive) kill(b, t);
   return real;
 }
 function kill(b, t) {
-  t.alive = false; t.sh = 0;
+  t.alive = false; t.sh = 0; b.fxq.push([t.uid, t.side === 'h' ? 'ล้ม!' : '', 'kill']); sfx('kill');
   if (t.side === 'e') { K(t.type).kills++; log(b, `${t.name} ถูกปราบ`) } else { b.fell = true; log(b, `💔 ${t.name} ล้มลง!`) }
 }
 // --- data-driven skill effects ---
@@ -488,7 +493,7 @@ function decide(b, e) {
 function newRound() {
   const b = B; b.phase = 'player'; b.busy = false; b.sel = null;
   aliveE(b).forEach(e => { if (e.st.stun) { delete e.st.stun; e.intent = null; log(b, `${e.name} มึนงง`) } else { e.intent = decide(b, e); e.turn++ } });
-  b.act = nextActor(-1);
+  b.act = nextActor(-1); b.fxq.push([0, `เทิร์น ${b.round}`, 'banner']); sfx('turn');
   if (b.act < 0) { render(); setTimeout(enemyPhase, 600) } else render();
 }
 function nextActor(from) {
@@ -511,7 +516,7 @@ function chooseTarget(side, i) {
 function doAct(u, k, t) {
   const b = B;
   if (k === 'potion') { S.inv.potions--; log(b, `${u.name} ใช้ยากับ ${t.name}`); healU(b, t, t.maxHp * C.dungeon.potionHeal) }
-  else { const s = HSK[k]; log(b, `${u.name} ใช้ ${s.name}${t && t !== u ? ' → ' + t.name : ''}`); runFx(b, u, t, s.fx, s.tgt); if (s.cd) u.cd[k] = s.cd + 1 }
+  else { const s = HSK[k]; log(b, `${u.name} ใช้ ${s.name}${t && t !== u ? ' → ' + t.name : ''}`); b.fxq.push([u.uid, '', s.tgt === 'enemy' || s.tgt === 'all' ? 'lunge' : 'cast']); runFx(b, u, t, s.fx, s.tgt); if (s.cd) u.cd[k] = s.cd + 1 }
   if (checkEnd()) return;
   b.act = nextActor(b.act);
   if (b.act < 0) enemyPhase(); else render();
@@ -519,11 +524,12 @@ function doAct(u, k, t) {
 async function enemyPhase() {
   const b = B; if (!b) return; b.phase = 'enemy'; b.busy = true; b.sel = null;
   b.enemies.forEach(e => { if (e.alive) e.sh = 0 });
+  b.fxq.push([0, 'ตาศัตรู', 'banner enemy']); sfx('enemy');
   render();
   for (const e of b.enemies.slice()) {
     if (!e.alive || !e.intent) continue;
     await sleep(600); if (B !== b) return;
-    execIntent(b, e); render();
+    b.acting = e.uid; execIntent(b, e); render(); b.acting = 0;
     if (checkEnd()) return;
   }
   await sleep(450); if (B !== b) return;
@@ -531,6 +537,7 @@ async function enemyPhase() {
 }
 function execIntent(b, e) {
   const sk = ESK[e.intent.k]; if (!sk) return;
+  b.fxq.push([e.uid, '', ['single', 'rand2', 'allh'].includes(sk.kind) ? 'lunge' : 'cast']);
   if (sk.reveal) K(e.type).rev = true;
   const single = idx => { let t = tauntHero(b) || b.heroes[idx]; if (!t || !t.alive) t = pick(aliveH(b)); return t };
   if (sk.kind === 'single') { const t = single(e.intent.t); if (!t) return; log(b, `${e.name}: ${sk.name} → ${t.name}`); if (sk.mult) hit(b, e, t, sk.mult); runFx(b, e, t, sk.fx, 'enemy') }
@@ -611,7 +618,7 @@ function unitHtml(b, u, i) {
   if (b.sel && u.alive) { const need = b.sel === 'potion' ? 'ally' : HSK[b.sel].tgt; isTg = (need === 'ally' && u.side === 'h') || (need === 'enemy' && u.side === 'e') }
   const act = u.side === 'h' && b.phase === 'player' && b.heroes[b.act] === u;
   const size = u.boss ? 96 : 72;
-  return `<div class="unit ${u.alive ? '' : 'down'} ${act ? 'act' : ''} ${isTg ? 'tg' : ''}" data-uid="${u.uid}" ${isTg ? `onclick="G.tgt('${u.side}',${i})"` : ''}>
+  return `<div class="unit ${u.side} ${u.alive ? '' : 'down'} ${act ? 'act' : ''} ${isTg ? 'tg' : ''} ${b.acting === u.uid ? 'acting' : ''}" data-uid="${u.uid}" ${isTg ? `onclick="G.tgt('${u.side}',${i})"` : ''}>
    ${u.side === 'e' ? intentHtml(b, u) : `<div class="pos">${i < 2 ? 'หน้า' : 'หลัง'}</div>`}
    <div style="display:flex;justify-content:center">${spr(u.file, u.emoji, u.color, size, '', u.alive ? u.anim : null)}</div>
    <div class="nm">${u.name}</div><div class="hpb ${u.side === 'e' ? 'e' : ''}"><i style="width:${u.hp / u.maxHp * 100}%"></i>${u.sh ? `<s style="width:${Math.min(100, u.sh / u.maxHp * 100)}%"></s>` : ''}</div>
@@ -627,17 +634,49 @@ function battleScreen() {
     else acts = `<div style="margin-bottom:6px"><b style="color:var(--lamp2)">${u.name}</b> <span class="mut">ถึงตาแล้ว</span></div><div class="grid">${[...u.skills, 'defend'].filter(k => HSK[k]).map(k => { const s = HSK[k], hid = HEROES[u.id].hidden === k; return `<button onclick="G.sk('${k}')" ${u.cd[k] ? 'disabled' : ''} style="${hid ? 'border-color:var(--pur)' : ''}">${hid ? '✦ ' : ''}${s.name}${u.cd[k] ? ` (${u.cd[k]})` : ''}<small>${s.desc}</small></button>` }).join('')}<button onclick="G.sk('potion')" ${S.inv.potions ? '' : 'disabled'}>${IC.potion()} ยา (${S.inv.potions})<small>ฟื้น HP ${Math.round(C.dungeon.potionHeal * 100)}%</small></button></div>`;
   }
   return `<div class="bt" style="${BG.dun(r.floor, b.kind === 'battle' ? '' : b.kind)}">
-  <div class="bar"><b class="pix" style="color:var(--lamp2)">ชั้น ${r.floor}</b><span>เทิร์น ${b.round}</span><span class="mut">${b.kind === 'boss' ? 'บอส' : b.kind === 'elite' ? 'ศัตรูเก่ง' : ''}</span></div>
+  <div class="bar"><b class="pix" style="color:var(--lamp2)">ชั้น ${r.floor}</b><span>เทิร์น ${b.round}</span><span class="mut">${b.kind === 'boss' ? 'บอส' : b.kind === 'elite' ? 'ศัตรูเก่ง' : ''}</span><button class="sm" style="margin-left:auto;padding:2px 8px" onclick="G.sfx()">${SFX.on ? '🔊' : '🔇'}</button></div>
   <div class="side">${b.enemies.map((e, i) => e.alive || !e.sum ? unitHtml(b, e, i) : '').join('')}</div>
   <div class="mid">${b.phase === 'player' ? 'วางแผนจากท่าที่ศัตรูประกาศไว้ด้านบน' : ''}</div>
   <div class="side">${b.heroes.map((h, i) => unitHtml(b, h, i)).join('')}</div>
   <div class="log">${b.log.slice(-4).map(l => `<div>${l}</div>`).join('')}</div>
   <div class="acts">${acts}</div></div>`;
 }
+const FX_CLASS = { dmg: 'hit', heal: 'glow-g', sh: 'glow-b', lunge: 'lunge', cast: 'cast', kill: 'dying' };
+function retrigger(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls) }
+function banner(text, cls) {
+  const d = document.createElement('div'); d.className = 'banner ' + (cls || ''); d.textContent = text;
+  document.body.appendChild(d); setTimeout(() => d.remove(), 1000);
+}
 function flushFx() {
   const b = B; if (!b) return; const q = b.fxq.splice(0);
-  q.forEach(([uid, t, c], k) => { const el = document.querySelector(`[data-uid="${uid}"]`); if (!el) return; const d = document.createElement('div'); d.className = 'float ' + c; d.textContent = t; d.style.animationDelay = (k % 3) * .08 + 's'; el.appendChild(d); setTimeout(() => d.remove(), 1200) });
+  const lead = q.some(x => x[2] === 'lunge') ? 140 : 0; let n = 0;
+  q.forEach(([uid, t, c]) => {
+    const kind = c.split(' ')[0];
+    if (kind === 'banner') { banner(t, c.split(' ')[1]); return }
+    const delay = kind === 'lunge' || kind === 'cast' ? 0 : lead;
+    setTimeout(() => {
+      if (kind === 'shake') { const a = document.querySelector('.bt'); if (a) retrigger(a, 'shake'); return }
+      const el = document.querySelector(`[data-uid="${uid}"]`); if (!el) return;
+      const cls = FX_CLASS[kind];
+      if (cls) { retrigger(el, cls); if (cls === 'hit') { const s = document.createElement('i'); s.className = 'slash'; el.appendChild(s); setTimeout(() => s.remove(), 400) } }
+      if (t) { const d = document.createElement('div'); d.className = 'float ' + c; d.textContent = t; d.style.animationDelay = (n++ % 3) * .1 + 's'; el.appendChild(d); setTimeout(() => d.remove(), 1300) }
+    }, delay);
+  });
 }
+// ----- sound (synth, no files) + vibration -----
+const SFX = { on: (() => { try { return localStorage.getItem('deepfall_sfx') !== '0' } catch (e) { return true } })(), ctx: null, last: {} };
+const SFX_DEF = { hit: ['square', 190, 70, .07, .11], big: ['sawtooth', 150, 40, .1, .22], heal: ['sine', 520, 900, .06, .25], shield: ['triangle', 320, 640, .05, .16], kill: ['square', 240, 40, .09, .32], turn: ['triangle', 520, 660, .035, .12], enemy: ['triangle', 300, 200, .04, .14] };
+function sfx(type) {
+  if (!SFX.on) return; const now = performance.now(); if (now - (SFX.last[type] || 0) < 45) return; SFX.last[type] = now;
+  try {
+    const c = SFX.ctx || (SFX.ctx = new (window.AudioContext || window.webkitAudioContext)()); if (c.state === 'suspended') c.resume();
+    const P = SFX_DEF[type]; if (!P) return; const t = c.currentTime, o = c.createOscillator(), g = c.createGain();
+    o.type = P[0]; o.frequency.setValueAtTime(P[1], t); o.frequency.exponentialRampToValueAtTime(P[2], t + P[4]);
+    g.gain.setValueAtTime(P[3], t); g.gain.exponentialRampToValueAtTime(.0001, t + P[4]);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t + P[4] + .02);
+  } catch (e) {}
+}
+function buzz(ms) { try { navigator.vibrate && navigator.vibrate(ms) } catch (e) {} }
 
 // ================= map potion / retreat =================
 function mapPotion() {
@@ -672,6 +711,7 @@ window.G = {
   sk: k => chooseSkill(k),
   tgt: (s, i) => chooseTarget(s, i),
   cancel: () => { if (B) { B.sel = null; render() } },
+  sfx: () => { SFX.on = !SFX.on; try { localStorage.setItem('deepfall_sfx', SFX.on ? '1' : '0') } catch (e) {} render() },
   reset: () => choiceModal('ลบเซฟ?', 'ข้อมูลทั้งหมดจะหายไปและเริ่มใหม่ตั้งแต่ต้น', [{ label: 'ลบและเริ่มใหม่', cls: 'dan', fn: () => { S = fresh(); B = null; ui.tab = 'home'; ui.prep = null; save(); closeModal(); render() } }, { label: 'ยกเลิก', fn: closeModal }])
 };
 
